@@ -1,69 +1,32 @@
-from functools import lru_cache
-
 import numpy as np
-from .main import init_weights
+import helper
 
 class Linear:
     def __init__(self, in_features, out_features, mode, lr=0.01):
         self.in_features = in_features
         self.out_features = out_features
+        self.lr = lr
 
-        self.W = np.random.randn(in_features, out_features) \
-                 * init_weights(mode=mode, fan_in=in_features, fan_out=out_features)
+        self.W = np.random.randn(out_features, in_features) \
+                 * helper.init_weights(mode=mode, fan_in=in_features, fan_out=out_features)
 
         self.b = np.zeros(out_features)
 
     def forward(self, x):
         self.x = x
-        return self.W @ x + self.b
+        return x @ self.W.T + self.b
 
     def backward(self, d_out):
 
-        self.dW = d_out @ self.x # dL/dW = dL/dz * dz/dW
+        self.dW = self.x.T @ d_out # dL/dW = dL/dz * dz/dW
         self.db = np.sum(d_out, axis=0)
 
-        return d_out @ self.x
+        return d_out @ self.W
 
     def init(self):
-        self.W -= self.dW * self.lr
-        self.b -= self.db * self.lr
+        self.W -= self.dW.T * self.lr
+        self.b -= self.db.T * self.lr
 
-class ReLu:
-    def forward(self, x):
-        self.mask = (x > 0)
-        return x * self.mask
 
-    def backward(self, d_out):
-        return d_out * self.mask
 
-class Softmax:
-    def forward(self, logits):
-        logits -= np.max(logits, axis=1, keepdims=True)  # explosion protection
-        exp = np.exp(logits)
-        return exp / np.sum(exp, axis=1, keepdims=True) # axis=1 for bathes, keepdims=1 - shape saving
-    def backward(self, d_out): # stub: dL/dz = softmax(logits) - y_true
-        # so Softmax.backward() take into account in CrossEntropy.backward()
-        return d_out
 
-class MLP:
-    def __init__(self, input_dim, hidden_dim, output_dim):
-        self.layers = [
-            Linear(input_dim, hidden_dim, mode='He'),
-            ReLu(),
-            Linear(hidden_dim, output_dim, mode='Xe'),
-            Softmax()
-        ]
-
-    def forward(self, x):
-        for layer in self.layers:
-            x = layer.forward(x)
-        return x
-
-    def backward(self, d_out):
-        for layer in reversed(self.layers):
-            d_out = layer.backward(d_out)
-        return d_out
-
-    def predict(self, x):
-        logits = self.forward(x)
-        return np.argmax(logits, axis=1)
