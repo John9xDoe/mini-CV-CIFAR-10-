@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from model_context import ExperimentContext
+
+
 class Visualizer:
     @staticmethod
     def show_image(img_idx, data_images, data_names):
@@ -23,5 +26,6 @@ class Visualizer:
         plt.ylabel("Точность")
         plt.grid(True)
         plt.legend()
-        plt.savefig(f'plots/plot_{len(epochs_data)}_epochs.png')
+        ctx = ExperimentContext()
+        plt.savefig(ctx.get_path("plot.png"))
         plt.show()

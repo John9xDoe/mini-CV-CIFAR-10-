@@ -1,18 +1,24 @@
+import json
+import logging
+
 import numpy as np
 
 from linear import  Linear
 from activations import ReLu, Softmax
+from model_context import ExperimentContext
+
 
 class MLP:
-    def __init__(self, input_dim, hidden_dim, output_dim, activation_class):
+    def __init__(self, input_dim, hidden_dim, output_dim, activation_class, lr):
 
         self.hidden_dim = hidden_dim
         self.activation_class = activation_class
+        self.lr = lr
 
         self.layers = [
-            Linear(input_dim, self.hidden_dim, mode='He'),
+            Linear(input_dim, self.hidden_dim, mode='He', lr=lr),
             self.activation_class(),
-            Linear(self.hidden_dim, output_dim, mode='Xe'),
+            Linear(self.hidden_dim, output_dim, mode='Xe', lr=lr),
             Softmax()
         ]
 
@@ -46,17 +52,25 @@ class MLP:
                 params[f"b{i}"] = layer.b
 
         meta={
-            "layers": sum(isinstance(l, Linear) for l in self.layers),
+            "cnt_layers": sum(isinstance(l, Linear) for l in self.layers),
+            "learning_rate": self.lr,
             "hidden_size": self.hidden_dim,
-            "activation": self.activation_class.__name__
+            "activation": self.activation_class.__name__,
+            "epochs": epochs
         }
 
-        np.savez(f"models/model_{epochs}.npz", **params, meta=meta)
+        ctx = ExperimentContext()
+        np.savez(ctx.get_path("model.npz"), **params)
+        with open(ctx.get_path("config.json"), 'w') as f:
+            json.dump(meta, f)
 
     @classmethod
     def load_model(cls, filename, input_dim=3072, output_dim=10):
-        data = np.load(filename)
-        meta = data["meta"].item()
+        ctx = ExperimentContext()
+
+        data = np.load(ctx.get_path("model.npz"))
+        with open(ctx.get_path("config.json"), 'r') as f:
+            meta = json.load(f)
 
         activation_class = MLP.get_activation_class(meta["activation"])
         model = cls(input_dim, meta["hidden_size"], output_dim, activation_class)
@@ -67,6 +81,7 @@ class MLP:
             if hasattr(layer, 'b'):
                 layer.b = data[f"b{i}"]
 
+        logging.info(f"model loaded: {model.input_dim}")
         return model
 
 
