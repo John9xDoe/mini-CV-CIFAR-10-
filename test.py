@@ -1,5 +1,5 @@
 import numpy as np
-from helper import accuracy
+import metrics
 
 class Tester:
     def __init__(self, X_test, y_test):
@@ -8,5 +8,5 @@ class Tester:
 
     def test(self, model):
         y_pred = model.predict(self.X_test)
-        return accuracy(y_pred, self.y_test)
+        return metrics.accuracy(y_pred, self.y_test)
 

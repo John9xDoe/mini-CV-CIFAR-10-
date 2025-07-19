@@ -18,7 +18,7 @@ class Linear:
 
     def backward(self, d_out):
 
-        self.dW = self.x.T @ d_out # dL/dW = dL/dz * dz/dW
+        self.dW = d_out.T @ self.x # dL/dW = dL/dz * dz/dW
         self.db = np.sum(d_out, axis=0)
 
         return d_out @ self.W

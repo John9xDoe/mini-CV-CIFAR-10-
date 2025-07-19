@@ -3,7 +3,7 @@ class SGD:
         self.lr = lr
 
     def step(self, model):
-        for layer in model.layers():
+        for layer in model.layers:
             if hasattr(layer, 'W') and hasattr(layer, 'dW'):
                 layer.W -= self.lr * layer.dW
                 layer.b -= self.lr * layer.db

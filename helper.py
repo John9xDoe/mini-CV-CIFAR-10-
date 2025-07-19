@@ -38,6 +38,3 @@ def init_weights(mode, fan_in, fan_out):
         return np.random.normal(0, std, size=(fan_out, fan_in))
     return ValueError("Unsupported mode")
 # ? size
-
-def accuracy(y_pred, y_true):
-    return np.mean(y_pred == y_true) * 100
