@@ -23,7 +23,7 @@ class DataLoader:
             logging.info(f'batch with path={path} unpickled')
 
         X_train = np.concatenate([d[b'data'] for d in train_data_dicts], axis=0)
-        y_train = np.sum([d[b'labels'] for d in train_data_dicts], [])
+        y_train = sum([d[b'labels'] for d in train_data_dicts], [])
         X_test, y_test = test_data[b'data'], test_data[b'labels']
 
         return X_train, y_train, X_test, y_test

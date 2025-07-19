@@ -24,3 +24,13 @@ class MLP:
     def predict(self, x):
         logits = self.forward(x)
         return np.argmax(logits, axis=1)
+
+    def save_model(self, epochs, lr):
+        model = []
+        for layer in self.layers:
+            if hasattr(layer, 'W'):
+                model.append(layer.W)
+            elif hasattr(layer, 'b'):
+                model.append(layer.b)
+
+        np.savez(f"{epochs}_({self.input_dim}-{self.hidden_dim}-{self.outputdim})_{lr}.npz", *model)

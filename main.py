@@ -21,11 +21,11 @@ X_train, X_test = helper.normalize(X_raw_train), helper.normalize(X_raw_test) # 
 
 
 if __name__ == '__main__':
-    model = MLP(input_dim=3072, hidden_dim=64, output_dim=10)
+    model = MLP(input_dim=3072, hidden_dim=128, output_dim=10)
     loss_fn = CrossEntropy()
     optimizer = SGD()
 
-    epochs = 10
+    epochs = 3
     idx_show_ep = 5
 
     trainer = Trainer(
@@ -45,3 +45,4 @@ if __name__ == '__main__':
         graph=True
     )
 
+    model.save_weights()

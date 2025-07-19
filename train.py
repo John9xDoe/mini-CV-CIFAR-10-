@@ -33,7 +33,7 @@ class Trainer:
                 self.model.backward(d_out)
                 self.optimizer.step(self.model)
 
-            log_msg = f"epoch {epoch}/{epochs} has passed"
+            log_msg = f"epoch {epoch}/{epochs - 1} has passed"
 
             if epoch % log_interval == 0:
                 y_pred = self.model.predict(X_test)
