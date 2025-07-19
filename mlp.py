@@ -11,7 +11,9 @@ from model_context import ExperimentContext
 class MLP:
     def __init__(self, input_dim, hidden_dim, output_dim, activation_class, lr):
 
+        self.input_dim = input_dim
         self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
         self.activation_class = activation_class
         self.lr = lr
 
@@ -39,7 +41,7 @@ class MLP:
     @staticmethod
     def get_activation_class_by_name(name):
         return {
-            "ReLU": ReLu,
+            "ReLu": ReLu,
             # "Sigmoid": Sigmoid
         }[name]
 
@@ -64,16 +66,26 @@ class MLP:
         with open(ctx.get_path("config.json"), 'w') as f:
             json.dump(meta, f)
 
+        logging.info(
+            f"""model saved:
+            layers_cnt: {meta["cnt_layers"]}
+            hidden_size: {meta["hidden_size"]}
+            activation: {meta["activation"]}
+            learning_rate: {meta["learning_rate"]}
+            epochs: {meta["epochs"]}
+            """
+        )
+
     @classmethod
-    def load_model(cls, filename, input_dim=3072, output_dim=10):
+    def load_model(cls, folder_id, input_dim=3072, output_dim=10):
         ctx = ExperimentContext()
 
-        data = np.load(ctx.get_path("model.npz"))
-        with open(ctx.get_path("config.json"), 'r') as f:
+        data = np.load(f"experiments/model_{folder_id}/model.npz")
+        with open(f"experiments/model_{folder_id}/config.json", 'r') as f:
             meta = json.load(f)
 
-        activation_class = MLP.get_activation_class(meta["activation"])
-        model = cls(input_dim, meta["hidden_size"], output_dim, activation_class)
+        activation_class = MLP.get_activation_class_by_name(meta["activation"])
+        model = cls(input_dim, meta["hidden_size"], output_dim, activation_class, meta['learning_rate'])
 
         for i, layer in enumerate(model.layers):
             if hasattr(layer, 'W'):
@@ -81,7 +93,16 @@ class MLP:
             if hasattr(layer, 'b'):
                 layer.b = data[f"b{i}"]
 
-        logging.info(f"model loaded: {model.input_dim}")
+        logging.info(
+            f"""model loaded: 
+            input_size: {model.input_dim} (default)
+            hidden_size: {model.hidden_dim}
+            output_size: {model.output_dim} (default)
+            activation_class": {model.activation_class.__name__} 
+            learining_rate: {model.lr}
+            layers_count: {meta['cnt_layers']}
+            epochs: {meta['epochs']}"""
+        )
         return model
 
 

@@ -50,13 +50,13 @@ def start(mode):
         model.save_model(epochs)
 
     elif mode == 'load_model':
-        model_name = input('model name: ')
+        model_name = input('folder_id: ')
         model = MLP.load_model(model_name, input_dim=3072, output_dim=10)
 
 if __name__ == '__main__':
 
+    #start(mode='load_model')
     start(mode='train')
-
 
 
 
