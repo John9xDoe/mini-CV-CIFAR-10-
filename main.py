@@ -7,6 +7,7 @@ from losses import CrossEntropy
 from mlp import MLP
 from train import Trainer
 from optimizers import SGD
+from load_data import DataLoader
 
 logging.basicConfig(
     level=logging.INFO
@@ -15,7 +16,7 @@ logging.basicConfig(
 test_data_path = 'cifar-10-batches-py/test_batch'
 train_data_paths = [f'cifar-10-batches-py/data_batch_{i}' for i in range(1, 5 + 1)]
 
-X_raw_train, y_train, X_raw_test, y_test = helper.load_data(test_data_path, train_data_paths)
+X_raw_train, y_train, X_raw_test, y_test = DataLoader.load_data(train_data_paths, test_data_path)
 X_train, X_test = helper.normalize(X_raw_train), helper.normalize(X_raw_test) # explosion protection
 
 
@@ -24,7 +25,7 @@ if __name__ == '__main__':
     loss_fn = CrossEntropy()
     optimizer = SGD()
 
-    epochs = 100
+    epochs = 10
     idx_show_ep = 5
 
     trainer = Trainer(
