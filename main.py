@@ -19,7 +19,6 @@ train_data_paths = [f'cifar-10-batches-py/data_batch_{i}' for i in range(1, 5 + 
 X_raw_train, y_train, X_raw_test, y_test = DataLoader.load_data(train_data_paths, test_data_path)
 X_train, X_test = helper.normalize(X_raw_train), helper.normalize(X_raw_test) # explosion protection
 
-
 if __name__ == '__main__':
     model = MLP(input_dim=3072, hidden_dim=128, output_dim=10)
     loss_fn = CrossEntropy()
@@ -45,4 +44,4 @@ if __name__ == '__main__':
         graph=True
     )
 
-    model.save_weights()
+    model.save_model(epochs)
