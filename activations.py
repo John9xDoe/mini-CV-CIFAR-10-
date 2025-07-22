@@ -15,4 +15,4 @@ class Softmax:
         return exp / np.sum(exp, axis=1, keepdims=True) # axis=1 for bathes, keepdims=1 - shape saving
     def backward(self, d_out): # stub: dL/dz = softmax(logits) - y_true
         # so Softmax.backward() take into account in CrossEntropy.backward()
-        return d_out
+        return d_out # plug to use 'y_pred - y_true' instead of chain rule

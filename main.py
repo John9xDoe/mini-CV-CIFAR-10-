@@ -21,13 +21,13 @@ def start(mode):
     X_raw_train, y_train, X_raw_test, y_test = DataLoader.load_data(train_data_paths, test_data_path)
     X_train, X_test = helper.normalize(X_raw_train), helper.normalize(X_raw_test)  # explosion protection
 
-    model = MLP(input_dim=3072, hidden_dim=128, output_dim=10, activation_class=ReLu, lr=0.01)
+    model = MLP(input_dim=3072, hidden_dim=128, output_dim=10, activation_class=ReLu, lr=0.001)
     loss_fn = CrossEntropy()
     optimizer = SGD()
 
     if mode == 'train':
 
-        epochs = 3
+        epochs = 100
         #idx_show_ep = 5
 
         trainer = Trainer(

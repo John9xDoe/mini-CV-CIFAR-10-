@@ -3,9 +3,6 @@ import pickle
 
 import numpy as np
 
-from helper import unpickle
-
-
 class DataLoader:
     @staticmethod
     def unpickle(file):
@@ -15,11 +12,11 @@ class DataLoader:
 
     @staticmethod
     def load_data(train_data_paths, test_data_path):
-        test_data = unpickle(test_data_path)
+        test_data = DataLoader.unpickle(test_data_path)
         train_data_dicts = []
 
         for path in train_data_paths:
-            train_data_dicts.append(unpickle(path))
+            train_data_dicts.append(DataLoader.unpickle(path))
             logging.info(f'batch with path={path} unpickled')
 
         X_train = np.concatenate([d[b'data'] for d in train_data_dicts], axis=0)

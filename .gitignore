@@ -1,0 +1,11 @@
+venv/
+.venv/
+.env
+.mypy_cache/
+__pycache__/
+.vscode/
+.bak
+.spyderproject
+.spyderworkspace
+.jobs.db
+.cifar-10-batches-py/

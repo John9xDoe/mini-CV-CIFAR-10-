@@ -14,11 +14,11 @@ class Linear:
 
     def forward(self, x):
         self.x = x
-        return x @ self.W.T + self.b
+        return x @ self.W.T + self.b # prediction
 
     def backward(self, d_out):
 
-        self.dW = d_out.T @ self.x # dL/dW = dL/dz * dz/dW
+        self.dW = d_out.T @ self.x # dL/dW = dL/dz * dz/dW = loss_grad * input
         self.db = np.sum(d_out, axis=0)
 
         return d_out @ self.W
