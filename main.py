@@ -7,7 +7,7 @@ from activations import ReLu
 from losses import CrossEntropy
 from mlp import MLP
 from train import Trainer
-from optimizers import SGD
+from optimizers import SGD, Momentum
 from load_data import DataLoader
 
 logging.basicConfig(
@@ -23,7 +23,7 @@ def start(mode):
 
     model = MLP(input_dim=3072, hidden_dim=128, output_dim=10, activation_class=ReLu, lr=0.001)
     loss_fn = CrossEntropy()
-    optimizer = SGD()
+    optimizer = Momentum(model)
 
     if mode == 'train':
 

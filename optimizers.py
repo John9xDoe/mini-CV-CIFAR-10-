@@ -1,12 +1,15 @@
 import numpy as np
 
+from linear import Linear
+
+
 class SGD:
     def __init__(self, lr=0.01):
         self.lr = lr
 
     def step(self, model):
         for layer in model.layers:
-            if hasattr(layer, 'W') and hasattr(layer, 'dW'):
+            if isinstance(layer, Linear):
                 layer.W -= self.lr * layer.dW
                 layer.b -= self.lr * layer.db
 
@@ -19,15 +22,15 @@ class Momentum:
         self.v_b = {}
 
         for idx, layer in enumerate(model.layers):
-            if hasattr(layer, 'W') and hasattr(layer, 'dW'):
+            if isinstance(layer, Linear):
                 self.v_W[idx] = np.zeros_like(layer.W)
                 self.v_b[idx] = np.zeros_like(layer.b)
 
     def step(self, model):
         for idx, layer in enumerate(model.layers):
-            if hasattr(layer, 'W') and hasattr(layer, 'dW'):
-                 self.v_W[idx] = self.y * self.v_W + (1 - self.y) * self.lr * layer.dW
-                 self.v_b[idx] = self.y * self.v_b + (1 - self.y) * self.lr * layer.db
+            if isinstance(layer, Linear):
+                 self.v_W[idx] = self.y * self.v_W[idx] + (1 - self.y) * self.lr * layer.dW
+                 self.v_b[idx] = self.y * self.v_b[idx] + (1 - self.y) * self.lr * layer.db
                  layer.W -= self.v_W[idx]
                  layer.b -= self.v_b[idx]
 
@@ -41,13 +44,13 @@ class RMSProp:
         self.G_b = {}
 
         for idx, layer in enumerate(model.layers):
-            if hasattr(layer, 'W') and hasattr(layer, 'dW'):
+            if isinstance(layer, Linear):
                 self.G_W[idx] = np.zeros_like(layer.dW)
                 self.G_b[idx] = np.zeros_like(layer.db)
 
     def step(self, model):
         for idx, layer in enumerate(model.layers):
-            if hasattr(layer, 'W') and hasattr(layer, 'dW'):
+            if isinstance(layer, Linear):
                 self.G_W[idx] = self.p * self.G_W[idx] + (1 - self.p) * layer.dW ** 2
                 self.G_b[idx] = self.p * self.G_b[idx] + (1 - self.p) * layer.db ** 2
                 layer.W -= self.lr * layer.dW / (np.sqrt(self.G_W[idx]) + self.eps)
@@ -64,7 +67,7 @@ class Adam:
         self.v_W, self.v_b, self.G_W, self.G_b = {}, {}, {}, {}
 
         for idx, layer in enumerate(model.layers):
-            if hasattr(layer, 'W') and hasattr(layer, 'dW'):
+            if isinstance(layer, Linear):
                 self.v_W[idx] = np.zeros_like(layer.W)
                 self.v_b[idx] = np.zeros_like(layer.b)
                 self.G_W[idx] = np.zeros_like(layer.W)
