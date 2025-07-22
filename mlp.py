@@ -9,18 +9,17 @@ from model_context import ExperimentContext
 
 
 class MLP:
-    def __init__(self, input_dim, hidden_dim, output_dim, activation_class, lr):
+    def __init__(self, input_dim, hidden_dim, output_dim, activation_class):
 
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
         self.activation_class = activation_class
-        self.lr = lr
 
         self.layers = [
-            Linear(input_dim, self.hidden_dim, mode='He', lr=lr),
+            Linear(input_dim, self.hidden_dim, mode='He'),
             self.activation_class(),
-            Linear(self.hidden_dim, output_dim, mode='Xe', lr=lr),
+            Linear(self.hidden_dim, output_dim, mode='Xe'),
             Softmax()
         ]
 
@@ -45,7 +44,7 @@ class MLP:
             # "Sigmoid": Sigmoid
         }[name]
 
-    def save_model(self, epochs):
+    def save_model(self):
         params = {}
         for i, layer in enumerate(self.layers):
             if hasattr(layer, 'W'):
@@ -55,10 +54,8 @@ class MLP:
 
         meta={
             "cnt_layers": sum(isinstance(l, Linear) for l in self.layers),
-            "learning_rate": self.lr,
             "hidden_size": self.hidden_dim,
             "activation": self.activation_class.__name__,
-            "epochs": epochs
         }
 
         ctx = ExperimentContext()
@@ -71,21 +68,17 @@ class MLP:
             layers_cnt: {meta["cnt_layers"]}
             hidden_size: {meta["hidden_size"]}
             activation: {meta["activation"]}
-            learning_rate: {meta["learning_rate"]}
-            epochs: {meta["epochs"]}
             """
         )
 
     @classmethod
     def load_model(cls, folder_id, input_dim=3072, output_dim=10):
-        ctx = ExperimentContext()
-
         data = np.load(f"experiments/model_{folder_id}/model.npz")
         with open(f"experiments/model_{folder_id}/config.json", 'r') as f:
             meta = json.load(f)
 
         activation_class = MLP.get_activation_class_by_name(meta["activation"])
-        model = cls(input_dim, meta["hidden_size"], output_dim, activation_class, meta['learning_rate'])
+        model = cls(input_dim, meta["hidden_size"], output_dim, activation_class)
 
         for i, layer in enumerate(model.layers):
             if hasattr(layer, 'W'):
@@ -98,10 +91,9 @@ class MLP:
             input_size: {model.input_dim} (default)
             hidden_size: {model.hidden_dim}
             output_size: {model.output_dim} (default)
-            activation_class": {model.activation_class.__name__} 
-            learining_rate: {model.lr}
+            activation_class: {model.activation_class.__name__} 
             layers_count: {meta['cnt_layers']}
-            epochs: {meta['epochs']}"""
+            """
         )
         return model
 
