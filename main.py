@@ -6,6 +6,7 @@ from activations import ReLu
 
 from losses import CrossEntropy
 from mlp import MLP
+from test import Tester
 from train import Trainer
 from optimizers import SGD, Momentum, RMSProp, Adam
 from load_data import DataLoader
@@ -24,6 +25,8 @@ def start(mode):
     model = MLP(input_dim=3072, hidden_dim=128, output_dim=10, activation_class=ReLu)
     loss_fn = CrossEntropy()
     optimizer = RMSProp(model, lr=0.1)
+
+    tester = Tester(X_test, y_test)
 
     if mode == 'train':
 
@@ -45,7 +48,8 @@ def start(mode):
             X_test=X_test,
             y_test=y_test,
             timer=True,
-            graph=True
+            graph=True,
+            patience=10
         )
 
         model.save_model()
@@ -59,6 +63,7 @@ if __name__ == '__main__':
 
     #start(mode='load_model')
     start(mode='train')
+
 
 
 

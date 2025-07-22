@@ -9,3 +9,4 @@ __pycache__/
 .spyderworkspace
 .jobs.db
 .cifar-10-batches-py/
+*.npz

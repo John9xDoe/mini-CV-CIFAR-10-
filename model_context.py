@@ -16,5 +16,5 @@ class ExperimentContext:
         self.run_dir = os.path.join(base_dir, f"model_{self.timestamp}")
         os.makedirs(self.run_dir, exist_ok=True)
 
-    def get_path(self, name=None):
+    def get_path(self, name=''):
         return os.path.join(self.run_dir, name)
