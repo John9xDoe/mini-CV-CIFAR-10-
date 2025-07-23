@@ -1,5 +1,4 @@
 
-import numpy as np
 import logging
 import helper
 from activations import ReLu
@@ -62,13 +61,14 @@ def start(mode):
 
     elif mode == 'grid_search':
         experiment_runner = ExperimentRunner()
-        experiment_runner.grid_search(X_train, y_train)
+        best_model = experiment_runner.grid_search(X_train, y_train)
+        print(f"best model: {best_model}")
 
 if __name__ == '__main__':
 
     #start(mode='load_model')
-    #start(mode='train')
-    start(mode='grid_search')
+    start(mode='train')
+    #start(mode='grid_search')
 
 
 

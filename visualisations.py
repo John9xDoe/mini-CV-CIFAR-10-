@@ -20,7 +20,8 @@ class Visualizer:
         plt.show()
 
     @staticmethod
-    def plot_epochs_currency(epochs_data, accuracy_data):
+    def plot_epochs_currency(epochs_data, accuracy_data, show=True):
+        #plt.clf()
         plt.plot(epochs_data, accuracy_data, label='Зависимость точности от количества эпох')
         plt.xlabel("Эпоха")
         plt.ylabel("Точность")
@@ -28,4 +29,5 @@ class Visualizer:
         plt.legend()
         ctx = ExperimentContext()
         plt.savefig(ctx.get_path("plot.png"))
-        plt.show()
+        if show:
+            plt.show()

@@ -1,7 +1,5 @@
-import itertools
 import time
 
-import numpy as np
 import logging
 import yaml
 
@@ -28,7 +26,7 @@ class Trainer:
             start_time = time.time()
 
         accs, epchs = [], []
-        best_acc, cur_acc,  bad_epochs = 0, 0, 0
+        best_acc, best_acc_epochs, best_acc_time, cur_acc, bad_epochs = 0, 0, 0, 0, 0
 
         epoch = 0
         while epoch < epochs:
@@ -60,6 +58,9 @@ class Trainer:
 
                 if cur_acc > best_acc + min_delta:
                     best_acc = cur_acc
+                    best_acc_epochs = epoch
+                    best_acc_time = time.time() - start_time
+
                     if bad_epochs != 0:
                         logging.info("bad epochs reset")
                     bad_epochs = 0
@@ -69,11 +70,17 @@ class Trainer:
 
                 if bad_epochs >= patience:
                     logging.info(f"Early stop at epoch {epoch} - acc: {cur_acc:.4f}")
+                    self.end_epoch = epoch
                     break
 
             epoch += 1
 
-        result = {"accuracy": cur_acc}
+        result = {
+            "accuracy": float(cur_acc), # float because cur_acc is np (bad printing for yaml)
+            "best accuracy": float(best_acc),
+            "best accuracy epochs": best_acc_epochs,
+            "best accuracy time": best_acc_time
+        }
 
         if timer:
             training_time = time.time() - start_time
@@ -81,7 +88,7 @@ class Trainer:
             result["time"] = training_time
 
         if graph:
-            Visualizer.plot_epochs_currency(epchs, accs)
+            Visualizer.plot_epochs_currency(epchs, accs, show=False)
 
         if save_res:
             ctx = ExperimentContext()
@@ -93,7 +100,7 @@ class Trainer:
         args = {
             "batch_size": self.batch_size,
             "lr": self.lr,
-            "epochs": self.epochs,
+            "epochs": self.end_epoch,
             "loss_fn": self.loss_fn.__class__.__name__,
             "optimizer": self.optimizer.__class__.__name__
         }

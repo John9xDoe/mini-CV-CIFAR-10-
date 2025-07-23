@@ -21,15 +21,15 @@ class ExperimentRunner:
         if params_model_grid is None:
             self.params_model_grid = {
                 "activation_class": [ReLu],
-                "hidden_dim": [64, 128]
+                "hidden_dim": [128]
             }
 
         if params_trainer_grid is None:
             self.params_trainer_grid = {
                 "loss_fn": [CrossEntropy],
-                "optimizer": [SGD, Momentum, RMSProp, Adam],
-                "batch_size": [128, 256],
-                "lr": [0.1, 0.01, 0.001, 0.0001]
+                "optimizer": [SGD],
+                "batch_size": [128],
+                "lr": [0.1, 0.01, 0.001]
             }
 
     def grid_search(self, X_train, y_train):
@@ -47,6 +47,8 @@ class ExperimentRunner:
         idx = 0
         for i, trainer_combo in enumerate(params_trainer_combinations):
             args_trainer_dict = dict(zip(trainer_keys, trainer_combo))
+            args_trainer_dict["loss_fn"] = args_trainer_dict["loss_fn"]()
+
             for j, model_combo in enumerate(params_models_combinations):
                 args_model_dict = dict(zip(model_keys, model_combo))
 
@@ -58,19 +60,13 @@ class ExperimentRunner:
                 logging.info(f"model config: \n{args_model_dict}")
 
                 model = MLP(**args_model_dict, input_dim=self.INPUT_DIM, output_dim=self.OUTPUT_DIM)
+                optimizer_class = args_trainer_dict["optimizer"]
+                optimizer = optimizer_class(model, lr=args_trainer_dict["lr"])
 
-                args_trainer_dict["loss_fn"] = args_trainer_dict["loss_fn"]()
+                args_trainer_dict_copy = args_trainer_dict.copy()
+                del args_trainer_dict_copy["optimizer"]
 
-                '''
-                if args_trainer_dict["optimizer"] != SGD:
-                    args_trainer_dict["optimizer"] = args_trainer_dict["optimizer"](model, lr=args_trainer_dict["lr"])
-                else:
-                    args_trainer_dict["optimizer"] = args_trainer_dict["optimizer"](lr=args_trainer_dict["lr"])
-                '''
-
-                args_trainer_dict["optimizer"] = args_trainer_dict["optimizer"](model, lr=args_trainer_dict["lr"])
-
-                trainer = Trainer(model, **args_trainer_dict)
+                trainer = Trainer(model, **args_trainer_dict_copy, optimizer=optimizer)
                 trainer.train(
                     epochs = float('inf'),
                     X_train=X_train,
@@ -78,13 +74,15 @@ class ExperimentRunner:
                     timer=True,
                     X_test=tester.X_test,
                     y_test=tester.y_test,
-                    patience=10,
-                    save_res=True
+                    patience=15,
+                    save_res=True,
+                    graph=True
                 )
 
-                results[f"{ctx.timestamp}"] = tester.test(model)
+                results[f"{ctx.timestamp}_{idx}"] = tester.test(model)
 
                 model.save_model()
                 trainer.save_config()
 
                 idx += 1
+        return max(results.items(), key=lambda x: x[1])
