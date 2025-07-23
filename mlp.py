@@ -64,7 +64,7 @@ class MLP:
             json.dump(meta, f)
 
         logging.info(
-            f"""model saved:
+            f"""model saved to '{ctx.get_path("model.npz")}':
             layers_cnt: {meta["cnt_layers"]}
             hidden_size: {meta["hidden_size"]}
             activation: {meta["activation"]}
@@ -87,7 +87,7 @@ class MLP:
                 layer.b = data[f"b{i}"]
 
         logging.info(
-            f"""model loaded: 
+            f"""model loaded from 'experiments/model_{folder_id}/model.npz': 
             input_size: {model.input_dim} (default)
             hidden_size: {model.hidden_dim}
             output_size: {model.output_dim} (default)

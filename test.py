@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import metrics
 
@@ -5,10 +7,12 @@ class Tester:
 
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
+    @classmethod
+    def get_instance(cls, X_test=None, y_test=None):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.init(*args, **kwargs)
+            cls._instance = cls(X_test, y_test)
+        return cls._instance
 
     def __init__(self, X_test, y_test):
         self.X_test = X_test

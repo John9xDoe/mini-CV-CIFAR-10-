@@ -4,7 +4,7 @@ from linear import Linear
 
 
 class SGD:
-    def __init__(self, lr):
+    def __init__(self, model=None, lr=0.1):
         self.lr = lr
 
     def step(self, model, lr=None):
@@ -16,7 +16,7 @@ class SGD:
                 layer.b -= lr * layer.db
 
 class Momentum:
-    def __init__(self, model, lr, y=0.9):
+    def __init__(self, model, lr=0.1, y=0.9):
         self.y = y
         self.lr = lr
 
@@ -39,7 +39,7 @@ class Momentum:
                  layer.b -= self.v_b[idx]
 
 class RMSProp:
-    def __init__(self, model, lr, p=0.9, eps=1e-8):
+    def __init__(self, model, lr=0.0001, p=0.9, eps=1e-8):
         self.p = p
         self.eps = eps
         self.lr = lr
@@ -63,7 +63,7 @@ class RMSProp:
                 layer.b -= lr * layer.db / (np.sqrt(self.G_b[idx]) + self.eps)
 
 class Adam:
-    def __init__(self, model, lr, y=0.9, a=0.999, eps=10**(-8)):
+    def __init__(self, model, lr=0.1, y=0.9, a=0.999, eps=10**(-8)):
         self.lr = lr
         self.y = y
         self.a = a

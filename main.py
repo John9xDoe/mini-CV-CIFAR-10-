@@ -3,6 +3,7 @@ import numpy as np
 import logging
 import helper
 from activations import ReLu
+from experiment_runner import ExperimentRunner
 
 from losses import CrossEntropy
 from mlp import MLP
@@ -22,13 +23,13 @@ def start(mode):
     X_raw_train, y_train, X_raw_test, y_test = DataLoader.load_data(train_data_paths, test_data_path)
     X_train, X_test = helper.normalize(X_raw_train), helper.normalize(X_raw_test)  # explosion protection
 
-    model = MLP(input_dim=3072, hidden_dim=128, output_dim=10, activation_class=ReLu)
-    loss_fn = CrossEntropy()
-    optimizer = RMSProp(model, lr=0.1)
-
-    tester = Tester(X_test, y_test)
+    tester = Tester.get_instance(X_test, y_test)
 
     if mode == 'train':
+
+        model = MLP(input_dim=3072, hidden_dim=128, output_dim=10, activation_class=ReLu)
+        loss_fn = CrossEntropy()
+        optimizer = RMSProp(model, lr=0.1)
 
         epochs = 1000
         #idx_show_ep = 5
@@ -59,11 +60,15 @@ def start(mode):
         model_name = input('folder_id: ')
         model = MLP.load_model(model_name, input_dim=3072, output_dim=10)
 
+    elif mode == 'grid_search':
+        experiment_runner = ExperimentRunner()
+        experiment_runner.grid_search(X_train, y_train)
+
 if __name__ == '__main__':
 
     #start(mode='load_model')
-    start(mode='train')
-
+    #start(mode='train')
+    start(mode='grid_search')
 
 
 

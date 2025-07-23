@@ -8,15 +8,13 @@ import yaml
 import helper
 from losses import CrossEntropy
 from metrics import accuracy
-from mlp import MLP
 from model_context import ExperimentContext
 from optimizers import Momentum, SGD, RMSProp, Adam
-from test import Tester
 from visualisations import Visualizer
 
 
 class Trainer:
-    def __init__(self, model, loss_fn, optimizer, batch_size, lr):
+    def __init__(self, model, loss_fn, optimizer, batch_size, lr=0.1):
         self.model = model
         self.loss_fn = loss_fn
         self.optimizer = optimizer
@@ -41,6 +39,7 @@ class Trainer:
                 d_out = self.loss_fn.backward()
 
                 self.model.backward(d_out)
+
                 self.optimizer.step(self.model, self.lr)
 
             log_msg = f"epoch {epoch}/{epochs - 1} has passed"
@@ -72,6 +71,8 @@ class Trainer:
                     logging.info(f"Early stop at epoch {epoch} - acc: {cur_acc:.4f}")
                     break
 
+            epoch += 1
+
         result = {"accuracy": cur_acc}
 
         if timer:
@@ -88,48 +89,6 @@ class Trainer:
                 yaml.dump(result, f)
         return result
 
-
-    def grid_search(self, params_trainer_grid, params_training_grid, params_model_grid):
-        tester = Tester()
-
-        params_trainer_combinations = list(itertools.product(*params_trainer_grid.values()))
-        params_training_combinations = list(itertools.product(*params_training_grid.values()))
-        params_models_combinations = list(itertools.product(*params_model_grid.values()))
-
-        trainer_keys = list(params_trainer_grid.keys())
-        training_keys = list(params_training_grid.keys())
-        model_keys = list(params_model_grid.keys())
-
-        results = {}
-        total_combinations = len(params_trainer_combinations) * len(params_training_combinations) * len(params_models_combinations)
-
-        idx = 0
-        for i, trainer_combo in enumerate(params_trainer_combinations):
-            args_trainer_dict = dict(zip(trainer_keys, trainer_combo))
-            for j, training_combo in enumerate(params_training_combinations):
-                args_training_dict = dict(zip(training_keys, training_combo))
-                for k, model_combo in enumerate(params_models_combinations):
-                    args_model_dict = dict(zip(model_keys, model_combo))
-
-                    ExperimentContext._instance = None
-                    ctx = ExperimentContext()
-
-                    logging.info(f"Run model {idx}/{total_combinations}")
-                    logging.info(f"trainer config: \n{args_trainer_dict}")
-                    logging.info(f"training config: \n{args_training_dict}")
-                    logging.info(f"model config: \n{args_model_dict}")
-
-                    model = MLP(**args_model_dict)
-                    trainer = Trainer(model, **args_trainer_dict)
-                    trainer.train(**args_training_dict, epochs = float('inf'), timer=True, X_test=tester.X_test, y_test=tester.y_test, patience=10, save_res=True)
-
-                    results[f"{ctx.timestamp}"] = tester.test(model)
-
-                    model.save_model()
-                    trainer.save_config()
-
-                    idx += 1
-
     def save_config(self):
         args = {
             "batch_size": self.batch_size,
@@ -145,7 +104,7 @@ class Trainer:
             yaml.dump(args, f)
 
         logging.info(
-            f"""config saved:
+            f"""config saved to '{ctx.get_path('args.yaml')}':
             batch_size: {args["batch_size"]}
             learning_rate: {args["lr"]}
             epochs: {args["epochs"]}
@@ -157,14 +116,14 @@ class Trainer:
     @staticmethod
     def load_config(folder_id):
         loss_fns = {
-            "CrossEntropy": CrossEntropy()
+            "CrossEntropy": CrossEntropy
         }
 
         optimizers = {
-            "SGD": SGD(),
-            "Momentum": Momentum(),
-            "RMSProp": RMSProp(),
-            "Adam": Adam()
+            "SGD": SGD,
+            "Momentum": Momentum,
+            "RMSProp": RMSProp,
+            "Adam": Adam
         }
         with open (f"experiments/model_{folder_id}/args.yaml", 'r') as f:
             args = yaml.safe_load(f)
@@ -173,7 +132,7 @@ class Trainer:
         args["optimizer"] = optimizers[args["optimizer"]]
 
         logging.info(
-            f"""config loaded:
+            f"""config loaded from 'experiments/model_{folder_id}/args.yaml':
             batch_size: {args["batch_size"]}
             learning_rate: {args["lr"]}
             epochs: {args["epochs"]}
